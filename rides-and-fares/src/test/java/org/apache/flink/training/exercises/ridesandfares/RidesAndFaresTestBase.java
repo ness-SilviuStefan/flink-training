@@ -26,7 +26,11 @@ import java.time.Instant;
 public class RidesAndFaresTestBase {
 
     public static TaxiRide testRide(long rideId) {
-        return new TaxiRide(rideId, true, Instant.EPOCH, 0F, 0F, 0F, 0F, (short) 1, 0, rideId);
+        return testRide(rideId, true);
+    }
+
+    public static TaxiRide testRide(long rideId, boolean isStart) {
+        return new TaxiRide(rideId, isStart, Instant.EPOCH, 0F, 0F, 0F, 0F, (short) 1, 0, rideId);
     }
 
     public static TaxiFare testFare(long rideId) {
