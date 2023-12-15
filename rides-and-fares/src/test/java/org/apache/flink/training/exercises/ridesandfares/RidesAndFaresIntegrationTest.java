@@ -33,6 +33,10 @@ import org.apache.flink.training.solutions.ridesandfares.RidesAndFaresSolution;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class RidesAndFaresIntegrationTest extends RidesAndFaresTestBase {
@@ -50,30 +54,33 @@ public class RidesAndFaresIntegrationTest extends RidesAndFaresTestBase {
 
     @Test
     public void testSeveralRidesAndFaresMixedTogether() throws Exception {
+        final int noOfRides = 10;
 
-        final TaxiRide ride1 = testRide(1);
-        final TaxiFare fare1 = testFare(1);
+        final List<TaxiRide> taxiRides = new ArrayList<>();
+        final List<TaxiFare> taxiFares = new ArrayList<>();
+        final List<RideAndFare> ridesAndFares = new ArrayList<>();
 
-        final TaxiRide ride2 = testRide(2);
-        final TaxiFare fare2 = testFare(2);
+        for (int rideId = 1; rideId <= noOfRides; rideId++) {
+            TaxiRide startTaxiRide = testRide(rideId);
+            taxiRides.add(startTaxiRide);
+            taxiRides.add(testRide(rideId, false));
 
-        final TaxiRide ride3 = testRide(3);
-        final TaxiFare fare3 = testFare(3);
+            TaxiFare taxiFare = testFare(rideId);
+            taxiFares.add(taxiFare);
 
-        final TaxiRide ride4 = testRide(4);
-        final TaxiFare fare4 = testFare(4);
+            ridesAndFares.add(new RideAndFare(startTaxiRide, taxiFare));
+        }
 
-        ParallelTestSource<TaxiRide> rides = new ParallelTestSource<>(ride1, ride4, ride3, ride2);
-        ParallelTestSource<TaxiFare> fares = new ParallelTestSource<>(fare2, fare4, fare1, fare3);
+        Collections.shuffle(taxiRides);
+        Collections.shuffle(taxiFares);
+
+        ParallelTestSource<TaxiRide> rides = new ParallelTestSource<>(taxiRides.toArray(new TaxiRide[0]));
+        ParallelTestSource<TaxiFare> fares = new ParallelTestSource<>(taxiFares.toArray(new TaxiFare[0]));
         TestSink<RideAndFare> sink = new TestSink<>();
 
         JobExecutionResult jobResult = ridesAndFaresPipeline().execute(rides, fares, sink);
         assertThat(sink.getResults(jobResult))
-                .containsExactlyInAnyOrder(
-                        new RideAndFare(ride1, fare1),
-                        new RideAndFare(ride2, fare2),
-                        new RideAndFare(ride3, fare3),
-                        new RideAndFare(ride4, fare4));
+                .containsExactlyInAnyOrder(ridesAndFares.toArray(new RideAndFare[0]));
     }
 
     protected ComposedTwoInputPipeline<TaxiRide, TaxiFare, RideAndFare> ridesAndFaresPipeline() {

@@ -77,12 +77,21 @@ public class TaxiFare implements Serializable {
 
     public long rideId;
     public long taxiId;
+
     public long driverId;
     public Instant startTime;
     public String paymentType;
     public float tip;
     public float tolls;
     public float totalFare;
+
+    public long getDriverId() {
+        return driverId;
+    }
+
+    public float getTip() {
+        return tip;
+    }
 
     @Override
     public String toString() {
