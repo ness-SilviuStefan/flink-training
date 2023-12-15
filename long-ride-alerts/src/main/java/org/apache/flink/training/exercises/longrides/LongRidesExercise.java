@@ -105,7 +105,7 @@ public class LongRidesExercise {
     @VisibleForTesting
     public static class AlertFunction extends KeyedProcessFunction<Long, TaxiRide, Long> {
 
-        private ValueState<TaxiRide> taxiRideState;
+        private transient ValueState<TaxiRide> taxiRideState;
 
         @Override
         public void open(Configuration config) {
